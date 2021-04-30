@@ -1,0 +1,1 @@
+# goodbye_nord_client
