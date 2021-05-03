@@ -1,1 +1,1 @@
-# goodbye_nord_client
+https://blog.ilusio.dev/goodbye-nordvpn-desktop-client/
