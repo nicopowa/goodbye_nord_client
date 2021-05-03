@@ -1,0 +1,18 @@
+{
+  "name": "nord",
+  "version": "1.0.0",
+  "description": "goodbye nord client",
+  "scripts": {
+    "ovpn": "node nordovpn"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nicopowa/goodbye_nord_client.git"
+  },
+  "author": "nico pr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nicopowa/goodbye_nord_client/issues"
+  },
+  "homepage": "https://github.com/nicopowa/goodbye_nord_client#readme"
+}
