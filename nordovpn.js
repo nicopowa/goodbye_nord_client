@@ -148,11 +148,10 @@ class NordOvpn {
 
 const args = process.argv.slice(2);
 
-if(args.length) {
+if(args.length || require.main === module) {
 
 	let options = args
 	.reduce((acc, cur) => {
-		console.log(cur);
 		if(~~cur.indexOf(":")) {
 			let key_value = cur.split(":");
 			acc[key_value[0]] = key_value[1];
@@ -164,12 +163,8 @@ if(args.length) {
 
 	new NordOvpn()
 	.ovpn(options.protocol, options.country, options.user, options.password)
-	.then(res => {
-		console.log("success", res.server);
-	})
-	.catch(err => {
-		console.log("error", err);
-	});
+	.then(res => console.log("success", res.server))
+	.catch(err => console.log("error", err));
 
 }
 
