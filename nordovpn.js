@@ -2,8 +2,19 @@ const https = require("https");
 const path = require("path");
 const fs = require("fs");
 
+/**
+ * @class NordOvpn : farewell Nord desktop client
+ */
 class NordOvpn {
 
+	/**
+	 * @method ovpn : 
+	 * @param {!string=} type : "tcp" (default) or "udp"
+	 * @param {!string=} countryCode : country code, defaults to NordVPN get_user_info_data detected country
+	 * @param {!string=} user : NordVPN username
+	 * @param {!string=} password : NordVPN password
+	 * @returns {Promise}
+	 */
     ovpn(type = "tcp", countryCode = "", user = "", password = "") {
 
 		const endpoint = "https://nordvpn.com/wp-admin/admin-ajax.php?action=";
@@ -23,7 +34,7 @@ class NordOvpn {
 					|| user_infos.country_code;
 
 					// find country
-					const country = countries
+					let country = countries
 					.find(cur => cur.code === countryCode);
 
 					if(!country) 
@@ -34,14 +45,14 @@ class NordOvpn {
 					.then(servers => {
 
 						// first recommended server
-						const server = servers.shift(), 
+						let server = servers.shift(), 
 							name = server.hostname + "." + type + ".ovpn";
 
 						// fetch profile data
 						this.fetch("https://downloads.nordcdn.com/configs/files/ovpn_" + type + "/servers/" + name, false)
 						.then(profile => {
 
-							const credFile = path.join(
+							let credFile = path.join(
 								__dirname, 
 								"profiles", 
 								"cred.txt"
@@ -86,7 +97,7 @@ class NordOvpn {
 									+ "setenv CLIENT_CERT 0"
 								);
 
-								const profilePath = path.join(
+								let profilePath = path.join(
 									__dirname, 
 									"profiles", 
 									name
@@ -126,6 +137,12 @@ class NordOvpn {
 
     }
 
+	/**
+	 * @method fetch : fetch request wrapper
+	 * @param {!string} url : where to ?
+	 * @param {!boolean=} json : JSON.parse return value
+	 * @return {string|Object} request result
+	 */
     fetch(url, json = true) {
 
         return new Promise((resolve, reject) => {
@@ -136,12 +153,23 @@ class NordOvpn {
 				url, 
 				res => 
 					res
-					.on("data", chunk => data += chunk)
-					.on("end", () => resolve(json ? JSON.parse(data) : data))
+					.on("data", chunk => 
+						data += chunk
+					)
+					.on("end", () => 
+						resolve(
+							json ? 
+							JSON.parse(data) 
+							: data
+						)
+					)
 			)
-			.on("error", err => reject(err));
+			.on("error", err => 
+				reject(err)
+			);
        
 		});
+		
     }
 	
 }
