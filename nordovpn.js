@@ -1,6 +1,6 @@
 const https = require("https");
-const path = require("path");
-const fs = require("fs");
+const path 	= require("path");
+const fs 	= require("fs");
 
 /**
  * @class NordOvpn : farewell Nord desktop client
@@ -15,11 +15,11 @@ class NordOvpn {
 	 * @param {!string=} password : NordVPN password
 	 * @returns {Promise}
 	 */
-    ovpn(type = "tcp", countryCode = "", user = "", password = "") {
+	ovpn(type = "tcp", countryCode = "", user = "", password = "") {
 
 		const endpoint = "https://nordvpn.com/wp-admin/admin-ajax.php?action=";
 
-        return new Promise(async (resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 
 			// fetch NordVPN country list
 			this.fetch(endpoint + "servers_countries")
@@ -70,7 +70,9 @@ class NordOvpn {
 									"utf8"
 								)
 								.then(cred => cred)
-								.catch(cred_error => reject(cred_error));
+								.catch(cred_error => 
+									reject(cred_error)
+								);
 
 							})
 							.catch(() => {
@@ -97,7 +99,7 @@ class NordOvpn {
 									+ "setenv CLIENT_CERT 0"
 								);
 
-								let profilePath = path.join(
+								let profilesPath = path.join(
 									__dirname, 
 									"profiles", 
 									name
@@ -106,36 +108,81 @@ class NordOvpn {
 								// flush profile
 								return fs.promises
 								.writeFile(
-									profilePath, 
+									profilesPath, 
 									profile
 								)
-								.then(() => {
-
+								.then(() => 
 									resolve({
 										server: server.hostname, 
 										file: name
-									});
-		
-								})
-								.catch(write_error => reject(write_error));
+									})
+								)
+								.catch(write_error => 
+									reject(write_error)
+								);
 
 							});
 
 						})
-						.catch(profile_error => reject(profile_error));
+						.catch(profile_error => 
+							reject(profile_error)
+						);
 
 					})
-					.catch(servers_error => reject(servers_error));
+					.catch(servers_error => 
+						reject(servers_error)
+					);
 
 				})
-				.catch(user_infos_error => reject(user_infos_error));
+				.catch(user_infos_error => 
+					reject(user_infos_error)
+				);
 
 			})
-			.catch(countries_error => reject(countries_error));				
+			.catch(countries_error => 
+				reject(countries_error)
+			);
 
-        });
+		});
 
-    }
+	}
+
+	clear() {
+
+		return new Promise(resolve => {
+
+			let profilesPath = path.join(
+				__dirname, 
+				"profiles"
+			);
+
+			fs.readdir(profilesPath, (err, files) => {
+
+				if(err) 
+					throw err;
+
+				for(const file of files) {
+
+					if(file.endsWith("ovpn")) {
+
+						fs.unlink(path.join(profilesPath, file), err => {
+
+							if(err) 
+								throw err;
+
+						});
+
+					}
+
+				}
+
+				resolve();
+			
+			});
+
+		});
+
+	}
 
 	/**
 	 * @method fetch : fetch request wrapper
@@ -143,13 +190,13 @@ class NordOvpn {
 	 * @param {!boolean=} json : JSON.parse return value
 	 * @return {string|Object} request result
 	 */
-    fetch(url, json = true) {
+	fetch(url, json = true) {
 
-        return new Promise((resolve, reject) => {
+		return new Promise((resolve, reject) => {
 
-            let data = "";
+			let data = "";
 
-            https.get(
+			https.get(
 				url, 
 				res => 
 					res
@@ -167,10 +214,10 @@ class NordOvpn {
 			.on("error", err => 
 				reject(err)
 			);
-       
+			
 		});
 		
-    }
+	}
 	
 }
 
@@ -189,8 +236,11 @@ if(args.length || require.main === module) {
 
 	console.log("NORD OVPN", options.protocol, options.country, options.user, options.password);
 
-	new NordOvpn()
-	.ovpn(options.protocol, options.country, options.user, options.password)
+	let gotcha = new NordOvpn();
+
+	gotcha
+	.clear()
+	.then(() => gotcha.ovpn(options.protocol, options.country, options.user, options.password))
 	.then(res => console.log("success", res.server))
 	.catch(err => console.log("error", err));
 
