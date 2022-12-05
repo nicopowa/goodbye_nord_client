@@ -30,8 +30,7 @@ class NordOvpn {
 				.then(user_infos => {
 
 					// provided country code or default to user info country
-					countryCode = countryCode.toUpperCase() 
-					|| user_infos.country_code;
+					countryCode = countryCode.toUpperCase() || user_infos.country_code;
 
 					// find country
 					let country = countries
@@ -241,7 +240,7 @@ if(args.length || require.main === module) {
 	gotcha
 	.clear()
 	.then(() => gotcha.ovpn(options.protocol, options.country, options.user, options.password))
-	.then(res => console.log("success", res.server))
+	.then(res => console.log(res.file))
 	.catch(err => console.log("error", err));
 
 }
