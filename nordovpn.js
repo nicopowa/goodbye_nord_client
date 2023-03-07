@@ -1,6 +1,6 @@
-const https = require("https");
-const path 	= require("path");
-const fs 	= require("fs");
+const https 	= require("https");
+const path 		= require("path");
+const fs 		= require("fs");
 
 /**
  * @class NordOvpn : farewell Nord desktop client
@@ -19,13 +19,15 @@ class NordOvpn {
 
 		const endpoint = "https://nordvpn.com/wp-admin/admin-ajax.php?action=";
 
-		return new Promise(async (resolve, reject) => {
+		return new Promise((resolve, reject) => {
 
 			// fetch NordVPN country list
+			this.log("fetch country list");
 			this.fetch(endpoint + "servers_countries")
 			.then(countries => {
 
 				// fetch user infos
+				this.log("fetch user infos");
 				this.fetch(endpoint + "get_user_info_data")
 				.then(user_infos => {
 
@@ -39,6 +41,7 @@ class NordOvpn {
 					if(!country) 
 						return reject("no country code" + countryCode);
 
+					this.log("fetch recomended servers");
 					// fetch recommended servers
 					this.fetch(endpoint + "servers_recommendations&filters={%22country_id%22:" + country.id + "}")
 					.then(servers => {
@@ -47,6 +50,7 @@ class NordOvpn {
 						let server = servers.shift(), 
 							name = server.hostname + "." + type + ".ovpn";
 
+						this.log("fetch profile data");
 						// fetch profile data
 						this.fetch("https://downloads.nordcdn.com/configs/files/ovpn_" + type + "/servers/" + name, false)
 						.then(profile => {
@@ -57,11 +61,13 @@ class NordOvpn {
 								"cred.txt"
 							);
 
+							this.log("check credentials file");
 							// check credentials file exists
 							fs.promises
 							.access(credFile, fs.constants.F_OK)
 							.then(() => {
 
+								this.log("read credentials file");
 								// read credentials file
 								return fs.promises
 								.readFile(
@@ -85,6 +91,7 @@ class NordOvpn {
 							})
 							.then(cred => {
 
+								this.log("inject credentials");
 								// inject credentials inside ovpn profile
 								profile = profile
 								.replace(
@@ -104,6 +111,7 @@ class NordOvpn {
 									name
 								);
 								
+								this.log("flush ovpn profile");
 								// flush profile
 								return fs.promises
 								.writeFile(
@@ -148,26 +156,29 @@ class NordOvpn {
 
 	clear() {
 
-		return new Promise(resolve => {
+		return new Promise((resolve, reject) => {
 
 			let profilesPath = path.join(
 				__dirname, 
 				"profiles"
 			);
 
-			fs.readdir(profilesPath, (err, files) => {
+			this.log("clear ovpn profiles");
+			fs
+			.readdir(profilesPath, (err, files) => {
 
 				if(err) 
-					throw err;
+					reject(err);
 
 				for(const file of files) {
 
 					if(file.endsWith("ovpn")) {
 
-						fs.unlink(path.join(profilesPath, file), err => {
+						fs
+						.unlink(path.join(profilesPath, file), err => {
 
 							if(err) 
-								throw err;
+								reject(err);
 
 						});
 
@@ -216,6 +227,12 @@ class NordOvpn {
 			
 		});
 		
+	}
+
+	log(str) {
+
+		console.log(str);
+
 	}
 	
 }
